@@ -17,6 +17,11 @@
             </a>
         </li>
         <li class="nav-item">
+            <a th:href="@{/boot/fullBootList}" class="nav-link text-white" th:classappend="${activePage == 'boot-list'} ? 'active' : ''">
+                <i class="bi bi-lightning-charge me-2"></i>抢机任务
+            </a>
+        </li>
+        <li class="nav-item">
             <a th:href="@{/vps/instances/list}" class="nav-link text-white" th:classappend="${activePage == 'vps-list'} ? 'active' : ''">
                 <i class="bi bi-hdd-rack me-2"></i>VPS 管理
             </a>

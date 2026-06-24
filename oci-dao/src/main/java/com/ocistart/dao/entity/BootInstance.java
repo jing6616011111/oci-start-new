@@ -22,9 +22,11 @@ public class BootInstance {
     private String region;
     private String architecture;
     private String operationSystem;
+    private String imageName;
     private Integer ocpus;
     private Integer memory;
     private Long disk;
+    private Integer instanceCount = 1;
 
     @Column(columnDefinition = "TEXT")
     private String rootPassword;

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-1">抢机 / 开机任务</h2>
+            <div class="text-muted small">
+                待开机 <span class="badge bg-secondary" th:text="${pendingCount}"></span>
+                开机中 <span class="badge bg-success" th:text="${runningCount}"></span>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" onclick="doAction('/boot/batchStart', 'POST')">
+                <i class="bi bi-play-fill"></i> 批量启动
+            </button>
+            <button class="btn btn-warning btn-sm" onclick="doAction('/boot/batchStop', 'POST')">
+                <i class="bi bi-stop-fill"></i> 批量停止
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="doAction('/boot/resetRetry', 'POST')">
+                <i class="bi bi-arrow-counterclockwise"></i> 清零失败计数
+            </button>
+        </div>
+    </div>
+
+    <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/boot/fullBootList}">
+        <div class="col-md-4">
+            <label class="form-label">租户</label>
+            <select name="tenantId" class="form-select">
+                <option value="">全部租户</option>
+                <option th:each="tenant : ${tenants}"
+                        th:value="${tenant.id}"
+                        th:selected="${selectedTenantId == tenant.id}"
+                        th:text="${(tenant.customName ?: tenant.tenancyName) + ' #' + tenant.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">架构</label>
+            <select name="architecture" class="form-select">
+                <option value="">全部架构</option>
+                <option value="ARM" th:selected="${selectedArchitecture == 'ARM'}">ARM</option>
+                <option value="AMD" th:selected="${selectedArchitecture == 'AMD'}">AMD</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-funnel"></i> 筛选
+            </button>
+        </div>
+    </form>
+
+    <form id="bootForm" class="border rounded p-3 mb-3" method="post" th:action="@{/boot/save}">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label">租户</label>
+                <select name="tenantId" class="form-select" required>
+                    <option value="">选择租户</option>
+                    <option th:each="tenant : ${tenants}"
+                            th:value="${tenant.id}"
+                            th:text="${(tenant.customName ?: tenant.tenancyName) + ' #' + tenant.id}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">区域</label>
+                <input name="region" class="form-control" placeholder="ap-tokyo-1" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">架构</label>
+                <select name="architecture" class="form-select" required>
+                    <option value="ARM">ARM</option>
+                    <option value="AMD">AMD</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">系统</label>
+                <input name="operationSystem" class="form-control" value="Ubuntu">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">镜像名称 / OCID</label>
+                <input name="imageName" class="form-control" placeholder="可选">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">CPU</label>
+                <input type="number" name="ocpus" min="1" max="24" value="1" class="form-control">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">内存</label>
+                <input type="number" name="memory" min="1" max="256" value="6" class="form-control">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">磁盘</label>
+                <input type="number" name="disk" min="47" value="50" class="form-control">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">数量</label>
+                <input type="number" name="instanceCount" min="1" value="1" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">最大重试</label>
+                <input type="number" name="maxRetry" min="1" value="5" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">备注</label>
+                <input name="remark" class="form-control" placeholder="用途、规格说明">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-save"></i> 保存配置
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th><th>租户</th><th>区域</th><th>架构</th><th>系统</th><th>规格</th>
+                    <th>磁盘</th><th>数量</th><th>状态</th><th>失败计数</th><th>更新时间</th><th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="task : ${tasks}">
+                    <td th:text="${task.id}"></td>
+                    <td th:text="${task.tenantId}"></td>
+                    <td><span class="badge bg-info" th:text="${task.region}"></span></td>
+                    <td th:text="${task.architecture}"></td>
+                    <td th:text="${task.operationSystem}"></td>
+                    <td th:text="${task.ocpus + 'C / ' + task.memory + 'GB'}"></td>
+                    <td th:text="${task.disk + 'GB'}"></td>
+                    <td th:text="${task.instanceCount}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${task.status == 'RUNNING'} ? 'bg-success' : (${task.status == 'PENDING'} ? 'bg-secondary' : 'bg-warning')"
+                              th:text="${task.status}"></span>
+                    </td>
+                    <td th:text="${task.retryCount}"></td>
+                    <td th:text="${task.updateTime ?: task.createTime}"></td>
+                    <td class="text-nowrap">
+                        <button class="btn btn-success btn-sm" th:onclick="'doAction(\\'/boot/start\\', \\'POST\\', {id: ' + ${task.id} + '})'">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" th:onclick="'doAction(\\'/boot/manualBoot\\', \\'POST\\', {id: ' + ${task.id} + '})'">
+                            手动
+                        </button>
+                        <button class="btn btn-warning btn-sm" th:onclick="'doAction(\\'/boot/stop\\', \\'POST\\', {id: ' + ${task.id} + '})'">
+                            <i class="bi bi-stop-fill"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" th:onclick="'doAction(\\'/boot/clone\\', \\'POST\\', {id: ' + ${task.id} + '})'">
+                            <i class="bi bi-files"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" th:onclick="'if(confirm(\\'确定删除这条抢机配置吗？\\')) doAction(\\'/boot/delete\\', \\'POST\\', {id: ' + ${task.id} + '})'">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(tasks)}">
+                    <td colspan="12" class="text-center text-muted py-4">暂无抢机配置</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="text-muted small" th:text="'共 ' + ${totalElements} + ' 条'"></div>
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/boot/fullBootList(page=${currentPage - 1}, size=${size}, tenantId=${selectedTenantId}, architecture=${selectedArchitecture})}">上一页</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link" th:text="${currentPage + 1} + ' / ' + ${totalPages}"></span>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/boot/fullBootList(page=${currentPage + 1}, size=${size}, tenantId=${selectedTenantId}, architecture=${selectedArchitecture})}">下一页</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</th:block>
+</body>
+</html>

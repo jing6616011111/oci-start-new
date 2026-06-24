@@ -34,12 +34,9 @@ if (tenantForm) {
     tenantForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
-        const data = {};
-        formData.forEach((v, k) => data[k] = v);
-        fetch('/tenant/save', {
+        fetch('/tenant/saveWithKey', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: formData
         })
         .then(res => res.json())
         .then(json => {
@@ -51,4 +48,61 @@ if (tenantForm) {
         })
         .catch(err => alert('错误：' + err.message));
     });
+}
+
+const bootForm = document.getElementById('bootForm');
+if (bootForm) {
+    bootForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('/boot/save', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(json => {
+            if (json.code === 200) {
+                location.reload();
+            } else {
+                alert('错误：' + (json.message || '保存失败'));
+            }
+        })
+        .catch(err => alert('错误：' + err.message));
+    });
+}
+
+function updateCustomName(id) {
+    const customName = prompt('请输入自定义名称');
+    if (customName === null) return;
+    doAction('/tenant/updateCustomName', 'POST', { id, customName });
+}
+
+function updateCost(id) {
+    const cost = prompt('请输入成本字段');
+    if (cost === null) return;
+    doAction('/tenant/updateCost', 'POST', { id, cost });
+}
+
+function openTenantStream(url) {
+    const log = document.getElementById('tenantStreamLog');
+    if (!log) return;
+    log.classList.remove('d-none');
+    log.textContent = '';
+
+    const source = new EventSource(url);
+    const append = (event) => {
+        log.textContent += event.data + '\n';
+        log.scrollTop = log.scrollHeight;
+    };
+
+    source.addEventListener('tenant-status', append);
+    source.addEventListener('audit', append);
+    source.addEventListener('complete', (event) => {
+        append(event);
+        source.close();
+    });
+    source.onerror = () => {
+        log.textContent += '连接已结束或发生错误\n';
+        source.close();
+    };
 }

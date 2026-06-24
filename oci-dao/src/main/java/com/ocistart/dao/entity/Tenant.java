@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -43,6 +44,15 @@ public class Tenant {
     private Boolean hasChildren;
 
     private String accountType;
+
+    private String cloudType = "OCI";
+    private Boolean emailServiceEnabled = false;
+    private String customName;
+    private BigDecimal cost = BigDecimal.ZERO;
+    private String status = "UNKNOWN";
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastCheckTime;
 
     @Transient
     private String accountTypeName;

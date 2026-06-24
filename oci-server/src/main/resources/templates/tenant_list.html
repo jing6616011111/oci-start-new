@@ -8,25 +8,76 @@
             <i class="bi bi-plus-circle me-1"></i>添加租户
         </a>
     </div>
+
+    <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/tenant/list}">
+        <div class="col-md-4">
+            <label class="form-label">搜索</label>
+            <input type="search" name="keyword" class="form-control" placeholder="名称、OCID、区域、指纹"
+                   th:value="${keyword}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">云类型</label>
+            <select name="cloudType" class="form-select">
+                <option value="">全部</option>
+                <option value="OCI" th:selected="${cloudType == 'OCI'}">OCI</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">邮箱服务 / MFA</label>
+            <select name="emailServiceEnabled" class="form-select">
+                <option value="">全部</option>
+                <option value="true" th:selected="${emailServiceEnabled == true}">已启用</option>
+                <option value="false" th:selected="${emailServiceEnabled == false}">未启用</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> 查询
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="openTenantStream('/tenant/checkAllStream')">
+                <i class="bi bi-activity"></i> 批量检测
+            </button>
+            <button type="button" class="btn btn-outline-warning" onclick="openTenantStream('/tenant/auditStream')">
+                <i class="bi bi-clipboard-data"></i> 一键审计
+            </button>
+        </div>
+    </form>
+
+    <pre id="tenantStreamLog" class="bg-dark text-light p-3 rounded small d-none" style="max-height: 220px; overflow:auto;"></pre>
+
     <div class="table-responsive">
         <table class="table table-hover table-sm">
             <thead class="table-dark">
                 <tr>
-                    <th>ID</th><th>名称</th><th>租户 ID</th><th>区域</th>
-                    <th>指纹</th><th>主区域</th><th>创建时间</th><th>操作</th>
+                    <th>ID</th><th>名称</th><th>自定义名</th><th>云类型</th><th>租户 ID</th><th>区域</th>
+                    <th>邮箱</th><th>状态</th><th>成本</th><th>创建时间</th><th>操作</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="t : ${tenants}">
                     <td th:text="${t.id}"></td>
                     <td th:text="${t.tenancyName}"></td>
+                    <td th:text="${t.customName} ?: '-'"></td>
+                    <td><span class="badge bg-secondary" th:text="${t.cloudType}"></span></td>
                     <td><code th:text="${t.tenantId}"></code></td>
                     <td><span class="badge bg-info" th:text="${t.region}"></span></td>
-                    <td><code class="small" th:text="${t.fingerprint}"></code></td>
-                    <td><span class="badge" th:classappend="${t.isHomeRegion} ? 'bg-success' : 'bg-secondary'"
-                              th:text="${t.isHomeRegion} ? '是' : '否'"></span></td>
-                    <td th:text="${t.createdAt}"></td>
+                    <td><span class="badge" th:classappend="${t.emailServiceEnabled} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${t.emailServiceEnabled} ? '已启用' : '未启用'"></span></td>
                     <td>
+                        <span class="badge" th:classappend="${t.status == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${t.status} ?: 'UNKNOWN'"></span>
+                    </td>
+                    <td th:text="${t.cost} ?: '0'"></td>
+                    <td th:text="${t.createdAt}"></td>
+                    <td class="text-nowrap">
+                        <button class="btn btn-outline-secondary btn-sm"
+                                th:onclick="'updateCustomName(' + ${t.id} + ')'">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm"
+                                th:onclick="'updateCost(' + ${t.id} + ')'">
+                            <i class="bi bi-cash-coin"></i>
+                        </button>
                         <button class="btn btn-outline-danger btn-sm"
                                 onclick="if(confirm('确定删除这个租户吗？')) doAction('/tenant/delete', 'POST', {id: [[${t.id}]]})">
                             <i class="bi bi-trash"></i>
@@ -35,13 +86,34 @@
                                 onclick="fetch('/tenant/check/' + [[${t.id}]]).then(r => r.json()).then(d => alert(d.message))">
                             <i class="bi bi-check-circle"></i> 检查
                         </button>
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="doAction('/tenant/sync/' + [[${t.id}]], 'POST')">
+                            <i class="bi bi-arrow-repeat"></i> 同步
+                        </button>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(tenants)}">
-                    <td colspan="8" class="text-center text-muted py-4">暂无租户配置</td>
+                    <td colspan="11" class="text-center text-muted py-4">暂无租户配置</td>
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="text-muted small" th:text="'共 ' + ${totalElements} + ' 条'"></div>
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/tenant/list(page=${currentPage - 1}, size=${size}, keyword=${keyword}, cloudType=${cloudType}, emailServiceEnabled=${emailServiceEnabled})}">上一页</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link" th:text="${currentPage + 1} + ' / ' + ${totalPages}"></span>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/tenant/list(page=${currentPage + 1}, size=${size}, keyword=${keyword}, cloudType=${cloudType}, emailServiceEnabled=${emailServiceEnabled})}">下一页</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </th:block>
 </body>

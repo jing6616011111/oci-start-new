@@ -3,39 +3,68 @@
 <body>
 <th:block th:fragment="content">
     <h2>添加 / 编辑租户</h2>
-    <form id="tenantForm" class="card p-4 shadow-sm mt-3" style="max-width: 600px;">
+    <form id="tenantForm" class="card p-4 shadow-sm mt-3" style="max-width: 760px;" enctype="multipart/form-data">
+        <input type="hidden" name="id" th:value="${tenant.id}">
         <div class="mb-3">
             <label class="form-label">租户名称</label>
-            <input type="text" name="tenancyName" class="form-control" required>
+            <input type="text" name="tenancyName" class="form-control" th:value="${tenant.tenancyName}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">自定义名称</label>
+            <input type="text" name="customName" class="form-control" th:value="${tenant.customName}" placeholder="用于本系统内显示">
         </div>
         <div class="mb-3">
             <label class="form-label">租户 ID（OCID）</label>
-            <input type="text" name="tenantId" class="form-control" required>
+            <input type="text" name="tenantId" class="form-control" th:value="${tenant.tenantId}" required>
         </div>
         <div class="mb-3">
             <label class="form-label">用户 ID（OCID）</label>
-            <input type="text" name="tenancy" class="form-control" required>
+            <input type="text" name="tenancy" class="form-control" th:value="${tenant.tenancy}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">OCI 用户名 / 邮箱</label>
+            <input type="text" name="userName" class="form-control" th:value="${tenant.userName}">
         </div>
         <div class="mb-3">
             <label class="form-label">区域</label>
             <select name="region" class="form-select">
-                <option value="ap-tokyo-1">ap-tokyo-1（东京）</option>
-                <option value="ap-seoul-1">ap-seoul-1（首尔）</option>
-                <option value="ap-osaka-1">ap-osaka-1（大阪）</option>
-                <option value="us-ashburn-1">us-ashburn-1（阿什本）</option>
-                <option value="us-phoenix-1">us-phoenix-1（凤凰城）</option>
-                <option value="eu-frankfurt-1">eu-frankfurt-1（法兰克福）</option>
-                <option value="uk-london-1">uk-london-1（伦敦）</option>
+                <option value="ap-tokyo-1" th:selected="${tenant.region == 'ap-tokyo-1'}">ap-tokyo-1（东京）</option>
+                <option value="ap-seoul-1" th:selected="${tenant.region == 'ap-seoul-1'}">ap-seoul-1（首尔）</option>
+                <option value="ap-osaka-1" th:selected="${tenant.region == 'ap-osaka-1'}">ap-osaka-1（大阪）</option>
+                <option value="us-ashburn-1" th:selected="${tenant.region == 'us-ashburn-1'}">us-ashburn-1（阿什本）</option>
+                <option value="us-phoenix-1" th:selected="${tenant.region == 'us-phoenix-1'}">us-phoenix-1（凤凰城）</option>
+                <option value="eu-frankfurt-1" th:selected="${tenant.region == 'eu-frankfurt-1'}">eu-frankfurt-1（法兰克福）</option>
+                <option value="uk-london-1" th:selected="${tenant.region == 'uk-london-1'}">uk-london-1（伦敦）</option>
             </select>
         </div>
         <div class="mb-3">
             <label class="form-label">指纹</label>
-            <input type="text" name="fingerprint" class="form-control" required>
+            <input type="text" name="fingerprint" class="form-control" th:value="${tenant.fingerprint}" required>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">云类型</label>
+                <select name="cloudType" class="form-select">
+                    <option value="OCI" th:selected="${tenant.cloudType == null || tenant.cloudType == 'OCI'}">OCI</option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">成本字段</label>
+                <input type="number" step="0.01" name="cost" class="form-control" th:value="${tenant.cost}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">邮箱服务 / MFA</label>
+                <select name="emailServiceEnabled" class="form-select">
+                    <option value="false" th:selected="${tenant.emailServiceEnabled != true}">未启用</option>
+                    <option value="true" th:selected="${tenant.emailServiceEnabled == true}">已启用</option>
+                </select>
+            </div>
         </div>
         <div class="mb-3">
             <label class="form-label">私钥（PEM）</label>
-            <textarea name="keyFile" class="form-control" rows="6" required></textarea>
-            <div class="form-text">粘贴完整的 PEM 编码私钥</div>
+            <input type="file" name="privateKeyFile" class="form-control mb-2" accept=".pem,.key,.txt">
+            <textarea name="keyFile" class="form-control" rows="6" th:text="${tenant.keyFile}"></textarea>
+            <div class="form-text">可以上传私钥文件，也可以粘贴完整的 PEM 编码私钥；上传文件优先。</div>
         </div>
         <button type="submit" class="btn btn-primary">保存租户</button>
     </form>
