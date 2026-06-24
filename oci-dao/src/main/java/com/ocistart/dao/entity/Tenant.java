@@ -1,6 +1,7 @@
 package com.ocistart.dao.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,6 +23,10 @@ public class Tenant {
     private String fingerprint;
     private String tenancy;
     private String region;
+
+    @JsonIgnore
+    @Lob
+    @Column(name = "key_file", columnDefinition = "CLOB")
     private String keyFile;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
