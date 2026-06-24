@@ -44,6 +44,12 @@ java -jar oci-server/target/oci-server-1.0.0-SNAPSHOT.jar
 
 ## Linux 一键安装包
 
+远程服务器一键安装：
+
+```bash
+curl -fLsS https://raw.githubusercontent.com/jing6616011111/oci-start-new/main/install-mirror.sh | bash
+```
+
 在本机编译并生成 Linux 安装包：
 
 ```bash
