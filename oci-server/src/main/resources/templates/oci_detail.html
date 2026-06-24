@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <h2>实例详情</h2>
+    <a th:href="@{/oci/list}" class="btn btn-sm btn-outline-secondary mb-3">&larr; 返回列表</a>
+    <div class="card" th:if="${instance != null}">
+        <div class="card-body">
+            <table class="table table-sm">
+                <tr><th>ID</th><td th:text="${instance.id}"></td></tr>
+                <tr><th>实例 ID</th><td><code th:text="${instance.instanceId}"></code></td></tr>
+                <tr><th>显示名称</th><td th:text="${instance.displayName}"></td></tr>
+                <tr><th>规格</th><td th:text="${instance.shape}"></td></tr>
+                <tr><th>状态</th><td th:text="${instance.state == 'RUNNING'} ? '运行中' : (${instance.state == 'STOPPED'} ? '已停止' : ${instance.state})"></td></tr>
+                <tr><th>公网 IP</th><td th:text="${instance.publicIps}"></td></tr>
+                <tr><th>内网 IP</th><td th:text="${instance.privateIps}"></td></tr>
+                <tr><th>可用性域</th><td th:text="${instance.availabilityDomain}"></td></tr>
+                <tr><th>OCPUs</th><td th:text="${instance.ocpus}"></td></tr>
+                <tr><th>内存（GB）</th><td th:text="${instance.memoryInGBs}"></td></tr>
+                <tr><th>启动盘（GB）</th><td th:text="${instance.bootVolumeSizeInGBs}"></td></tr>
+                <tr><th>架构</th><td th:text="${instance.architecture}"></td></tr>
+                <tr><th>操作系统</th><td th:text="${instance.operatingSystem}"></td></tr>
+                <tr><th>备注</th><td th:text="${instance.remark}"></td></tr>
+            </table>
+        </div>
+    </div>
+    <div th:if="${instance == null}" class="alert alert-warning">未找到实例</div>
+</th:block>
+</body>
+</html>

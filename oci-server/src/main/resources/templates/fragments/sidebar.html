@@ -1,0 +1,35 @@
+<nav th:fragment="sidebar" class="sidebar bg-dark text-white d-flex flex-column p-3" style="width: 240px; min-height: 100vh; position: fixed;">
+    <h5 class="text-center mb-4">OCI Start</h5>
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+            <a th:href="@{/}" class="nav-link text-white" th:classappend="${activePage == 'home'} ? 'active' : ''">
+                <i class="bi bi-house-door me-2"></i>首页
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/dashboard}" class="nav-link text-white" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+                <i class="bi bi-speedometer2 me-2"></i>仪表盘
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/oci/list}" class="nav-link text-white" th:classappend="${activePage == 'oci-list'} ? 'active' : ''">
+                <i class="bi bi-server me-2"></i>OCI 实例
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/vps/instances/list}" class="nav-link text-white" th:classappend="${activePage == 'vps-list'} ? 'active' : ''">
+                <i class="bi bi-hdd-rack me-2"></i>VPS 管理
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/tenant/list}" class="nav-link text-white" th:classappend="${activePage == 'tenant-list'} ? 'active' : ''">
+                <i class="bi bi-people me-2"></i>租户
+            </a>
+        </li>
+    </ul>
+    <div class="mt-auto">
+        <a th:href="@{/logout}" class="nav-link text-white-50">
+            <i class="bi bi-box-arrow-right me-2"></i>退出登录
+        </a>
+    </div>
+</nav>

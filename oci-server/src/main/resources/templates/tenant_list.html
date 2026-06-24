@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>租户管理</h2>
+        <a th:href="@{/tenant/add}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>添加租户
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th><th>名称</th><th>租户 ID</th><th>区域</th>
+                    <th>指纹</th><th>主区域</th><th>创建时间</th><th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="t : ${tenants}">
+                    <td th:text="${t.id}"></td>
+                    <td th:text="${t.tenancyName}"></td>
+                    <td><code th:text="${t.tenantId}"></code></td>
+                    <td><span class="badge bg-info" th:text="${t.region}"></span></td>
+                    <td><code class="small" th:text="${t.fingerprint}"></code></td>
+                    <td><span class="badge" th:classappend="${t.isHomeRegion} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${t.isHomeRegion} ? '是' : '否'"></span></td>
+                    <td th:text="${t.createdAt}"></td>
+                    <td>
+                        <button class="btn btn-outline-danger btn-sm"
+                                onclick="if(confirm('确定删除这个租户吗？')) doAction('/tenant/delete', 'POST', {id: [[${t.id}]]})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-outline-info btn-sm"
+                                onclick="fetch('/tenant/check/' + [[${t.id}]]).then(r => r.json()).then(d => alert(d.message))">
+                            <i class="bi bi-check-circle"></i> 检查
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(tenants)}">
+                    <td colspan="8" class="text-center text-muted py-4">暂无租户配置</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,52 @@
+spring:
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 2592000
+  cache:
+    type: caffeine
+    caffeine:
+      spec: initialCapacity=100,maximumSize=1000,expireAfterAccess=30m,expireAfterWrite=1h
+  main:
+    lazy-initialization: true
+    banner-mode: log
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+  application:
+    name: oci-start
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:file:./data/oci_db;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
+    show-sql: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 9856
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    com.ocistart: DEBUG
+    com.oracle.bmc: WARN
+    org.springframework.security: WARN

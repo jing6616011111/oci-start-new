@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <h2>仪表盘</h2>
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <div class="card text-bg-primary mb-3">
+                <div class="card-body text-center">
+                    <h3 th:text="${stats.total}">0</h3>
+                    <div>开机尝试总数</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-success mb-3">
+                <div class="card-body text-center">
+                    <h3 th:text="${stats.success}">0</h3>
+                    <div>成功次数</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-danger mb-3">
+                <div class="card-body text-center">
+                    <h3 th:text="${stats.fail}">0</h3>
+                    <div>失败次数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

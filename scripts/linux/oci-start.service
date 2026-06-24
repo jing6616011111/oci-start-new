@@ -1,0 +1,15 @@
+[Unit]
+Description=OCI Start 云管理面板
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/oci-start
+ExecStart=/usr/bin/env java -jar /opt/oci-start/oci-start.jar
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

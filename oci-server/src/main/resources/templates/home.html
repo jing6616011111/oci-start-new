@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>OCI Start - Oracle 云管理面板</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-server display-3 text-primary"></i>
+                    <h5 class="mt-2">实例管理</h5>
+                    <p class="text-muted small">创建、启动、停止和监控 OCI 实例</p>
+                    <a th:href="@{/oci/list}" class="btn btn-outline-primary btn-sm">管理</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-3 text-success"></i>
+                    <h5 class="mt-2">租户管理</h5>
+                    <p class="text-muted small">管理多个 OCI 租户和 API 密钥</p>
+                    <a th:href="@{/tenant/list}" class="btn btn-outline-success btn-sm">管理</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-speedometer2 display-3 text-warning"></i>
+                    <h5 class="mt-2">仪表盘</h5>
+                    <p class="text-muted small">查看统计和监控数据</p>
+                    <a th:href="@{/dashboard}" class="btn btn-outline-warning btn-sm">查看</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

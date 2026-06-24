@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <h2>VPS 实例管理</h2>
+    <div class="table-responsive mt-3">
+        <table class="table table-hover table-sm align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>名称</th><th>规格</th><th>状态</th><th>公网 IP</th><th>内网 IP</th>
+                    <th>CPU/内存</th><th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="inst : ${instances}">
+                    <td th:text="${inst.displayName}"></td>
+                    <td><span class="badge bg-secondary" th:text="${inst.shape}"></span></td>
+                    <td><span class="badge" th:classappend="${inst.state == 'RUNNING'} ? 'bg-success' : 'bg-warning'"
+                              th:text="${inst.state == 'RUNNING'} ? '运行中' : (${inst.state == 'STOPPED'} ? '已停止' : ${inst.state})"></span></td>
+                    <td><code th:text="${inst.publicIps}"></code></td>
+                    <td><code th:text="${inst.privateIps}"></code></td>
+                    <td th:text="${inst.ocpus} + 'C/' + ${inst.memoryInGBs} + 'G'"></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-success btn-sm"
+                                    onclick="doAction('/vps/instances/start', 'POST', {instanceId: '[[${inst.instanceId}]]'})">
+                                <i class="bi bi-play-fill"></i> 启动
+                            </button>
+                            <button class="btn btn-warning btn-sm"
+                                    onclick="doAction('/vps/instances/stop', 'POST', {instanceId: '[[${inst.instanceId}]]'})">
+                                <i class="bi bi-stop-fill"></i> 停止
+                            </button>
+                            <button class="btn btn-info btn-sm"
+                                    onclick="doAction('/vps/instances/restart', 'POST', {instanceId: '[[${inst.instanceId}]]'})">
+                                <i class="bi bi-arrow-repeat"></i> 重启
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(instances)}">
+                    <td colspan="7" class="text-center text-muted py-4">暂无实例</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+</body>
+</html>

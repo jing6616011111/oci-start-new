@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout">
+<body>
+<th:block th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>OCI 实例列表</h2>
+    </div>
+    <div class="mb-3">
+        <form class="row g-2" method="get" th:action="@{/oci/list}">
+            <div class="col-auto">
+                <select name="tenantId" class="form-select form-select-sm">
+                    <option value="">全部租户</option>
+                    <option th:each="t : ${tenants}" th:value="${t.id}"
+                            th:text="${t.tenancyName}"
+                            th:selected="${selectedTenantId != null && selectedTenantId.toString() == t.id.toString()}"></option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">筛选</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>名称</th>
+                    <th>规格</th>
+                    <th>状态</th>
+                    <th>公网 IP</th>
+                    <th>CPU/内存</th>
+                    <th>启动盘</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="inst : ${instances}">
+                    <td th:text="${inst.id}"></td>
+                    <td>
+                        <a th:href="@{/oci/detail/{id}(id=${inst.id})}" th:text="${inst.displayName}"></a>
+                    </td>
+                    <td><span class="badge bg-secondary" th:text="${inst.shape}"></span></td>
+                    <td>
+                        <span class="badge" th:classappend="${inst.state == 'RUNNING'} ? 'bg-success' : (${inst.state == 'STOPPED'} ? 'bg-warning' : 'bg-danger')"
+                              th:text="${inst.state == 'RUNNING'} ? '运行中' : (${inst.state == 'STOPPED'} ? '已停止' : ${inst.state})"></span>
+                    </td>
+                    <td><code th:text="${inst.publicIps}"></code></td>
+                    <td th:text="${inst.ocpus} + 'C/' + ${inst.memoryInGBs} + 'G'"></td>
+                    <td th:text="${inst.bootVolumeSizeInGBs} + ' GB'"></td>
+                    <td>
+                        <span th:text="${inst.remark}" class="text-muted small"></span>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button th:if="${inst.state == 'STOPPED'}" class="btn btn-success btn-sm"
+                                    onclick="doAction('/oci/start', 'POST', {instanceId: '[[${inst.instanceId}]]'})" title="启动">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                            <button th:if="${inst.state == 'RUNNING'}" class="btn btn-warning btn-sm"
+                                    onclick="doAction('/oci/stop', 'POST', {instanceId: '[[${inst.instanceId}]]'})" title="停止">
+                                <i class="bi bi-stop-fill"></i>
+                            </button>
+                            <button class="btn btn-info btn-sm"
+                                    onclick="doAction('/oci/changeIp', 'POST', {instanceId: [[${inst.id}]]})" title="更换 IP">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="if(confirm('确定删除这条实例记录吗？')) doAction('/oci/delete', 'POST', {id: [[${inst.id}]]})" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(instances)}">
+                    <td colspan="9" class="text-center text-muted py-4">暂无实例</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 分页 -->
+    <nav th:if="${totalPages > 1}">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/oci/list(page=${currentPage - 1}, size=${size})}">上一页</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link" th:text="${currentPage + 1} + ' / ' + ${totalPages}"></span></li>
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/oci/list(page=${currentPage + 1}, size=${size})}">下一页</a>
+            </li>
+        </ul>
+    </nav>
+</th:block>
+</body>
+</html>
